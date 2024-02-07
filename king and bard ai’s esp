@@ -1,51 +1,38 @@
-local Players = game:GetService("Players")
-local Teams = game:GetService("Teams")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+-- Script to highlight all players with the color red
 
--- Helper function to access team color or default to gray
-local function getTeamColor(team)
-  local colorMap = {
-    ["Red"] = Color3.fromRGB(255, 0, 0),
-    ["Blue"] = Color3.fromRGB(0, 0, 255),
-    ["Green"] = Color3.fromRGB(0, 255, 0),
-    -- Add more colors for other teams
-  }
-  return colorMap[team.Name] or Color3.fromRGB(128, 128, 128) -- Default gray
+-- Define the color red
+local redColor = Color3.fromRGB(255, 0, 0)
+
+-- Function to highlight a player with red color
+local function highlightPlayer(player)
+    local character = player.Character
+    if character then
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Color = redColor
+            end
+        end
+    end
 end
 
--- Script running locally on all clients
-local highlightMaterial = Instance.new("Material")
-highlightMaterial.Name = "HighlightMaterial"
-highlightMaterial.Diffuse = Color3.fromRGB(255, 255, 255)
-highlightMaterial.Transparency = 0.3
-
-ReplicatedStorage.HighlightMaterial = highlightMaterial
-
--- Update highlight for a specific player
-local function updatePlayerHighlight(player)
-  local character = player.Character
-  if not character then return end
-
-  local highlight = character:FindFirstChild("Highlight")
-  if not highlight then
-    highlight = Instance.new("Part")
-    highlight.Name = "Highlight"
-    highlight.CanCollide = false
-    highlight.Material = highlightMaterial
-    highlight.Size = character.HumanoidRootPart.Size * 1.1
-    character.HumanoidRootPart:AppendChild(highlight)
-  end
-
-  local team = player.Team
-  highlight.Diffuse = getTeamColor(team)
+-- Function to remove red color from a player
+local function removeHighlight(player)
+    local character = player.Character
+    if character then
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Color = Color3.new(1, 1, 1) -- Reset to default color
+            end
+        end
+    end
 end
 
--- Update highlights for existing players
-for _, player in pairs(Players:GetPlayers()) do
-  updatePlayerHighlight(player)
-end
+-- Connect the highlight function to players entering the game
+game.Players.PlayerAdded:Connect(function(player)
+    highlightPlayer(player)
+end)
 
--- Update highlights whenever a player changes team
-Teams.TeamChanged:Connect(function(player, oldTeam, newTeam)
-  updatePlayerHighlight(player)
+-- Connect the remove highlight function to players leaving the game
+game.Players.PlayerRemoving:Connect(function(player)
+    removeHighlight(player)
 end)
