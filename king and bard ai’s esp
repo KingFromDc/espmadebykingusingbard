@@ -1,49 +1,51 @@
-while true do
-wait(1)
-print("works")
 local Players = game:GetService("Players")
 local Teams = game:GetService("Teams")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- Store a table to map team names to colors
-local teamColors = {
-  ["Red"] = Color3.fromRGB(255, 0, 0),
-  ["Blue"] = Color3.fromRGB(0, 0, 255),
-  ["Green"] = Color3.fromRGB(0, 255, 0),
-  -- Add more colors for other teams
-}
+-- Helper function to access team color or default to gray
+local function getTeamColor(team)
+  local colorMap = {
+    ["Red"] = Color3.fromRGB(255, 0, 0),
+    ["Blue"] = Color3.fromRGB(0, 0, 255),
+    ["Green"] = Color3.fromRGB(0, 255, 0),
+    -- Add more colors for other teams
+  }
+  return colorMap[team.Name] or Color3.fromRGB(128, 128, 128) -- Default gray
+end
 
--- Function to create and update player highlight
-function updatePlayerHighlight(player)
+-- Script running locally on all clients
+local highlightMaterial = Instance.new("Material")
+highlightMaterial.Name = "HighlightMaterial"
+highlightMaterial.Diffuse = Color3.fromRGB(255, 255, 255)
+highlightMaterial.Transparency = 0.3
+
+ReplicatedStorage.HighlightMaterial = highlightMaterial
+
+-- Update highlight for a specific player
+local function updatePlayerHighlight(player)
   local character = player.Character
   if not character then return end
 
   local highlight = character:FindFirstChild("Highlight")
   if not highlight then
-    highlight = character:Clone()
+    highlight = Instance.new("Part")
     highlight.Name = "Highlight"
     highlight.CanCollide = false
-    highlight.Transparency = 0.3
-    -- Adjust other properties like Material, Reflectance, etc.
+    highlight.Material = highlightMaterial
+    highlight.Size = character.HumanoidRootPart.Size * 1.1
     character.HumanoidRootPart:AppendChild(highlight)
   end
 
-  local teamName = player.Team.Name
-  if teamColors[teamName] then
-    highlight.FillColor3 = teamColors[teamName]
-  end
+  local team = player.Team
+  highlight.Diffuse = getTeamColor(team)
 end
 
--- Loop through all players and update their highlights
+-- Update highlights for existing players
 for _, player in pairs(Players:GetPlayers()) do
   updatePlayerHighlight(player)
 end
 
 -- Update highlights whenever a player changes team
-Players.PlayerAdded:Connect(function(player)
-  updatePlayerHighlight(player)
-end)
-
 Teams.TeamChanged:Connect(function(player, oldTeam, newTeam)
   updatePlayerHighlight(player)
 end)
