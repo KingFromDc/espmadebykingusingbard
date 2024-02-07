@@ -1,6 +1,6 @@
 while do true
 wait(1)
-print("works!"
+print("works")
 local players = game.Players:GetPlayers()
 
 for _, player in pairs(players) do
