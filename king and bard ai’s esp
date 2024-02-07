@@ -1,1 +1,35 @@
+while do true
+wait(1)
+print("works!"
+local players = game.Players:GetPlayers()
+
+for _, player in pairs(players) do
+  local character = player.Character
+  
+  if character and character:FindFirstChild("Humanoid") then
+    local highlight = script.Highlight:Clone()
+    highlight.Parent = character
+    highlight.Enabled = true -- Optional: adjust highlight properties here
+  end
+end
+
+-- Add code to handle new players joining and existing players leaving
+game.Players.PlayerAdded:Connect(function(newPlayer)
+  local character = newPlayer.Character
+  if character and character:FindFirstChild("Humanoid") then
+    local highlight = script.Highlight:Clone()
+    highlight.Parent = character
+    highlight.Enabled = true
+  end
+end)
+
+game.Players.PlayerRemoving:Connect(function(oldPlayer)
+  local character = oldPlayer.Character
+  if character then
+    local highlight = character:FindFirstChild("Highlight")
+    if highlight then
+      highlight:Destroy()
+    end
+  end
+end)
 
