@@ -1,35 +1,49 @@
 while true do
 wait(1)
 print("works")
-local players = game.Players:GetPlayers()
+local Players = game:GetService("Players")
+local Teams = game:GetService("Teams")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-for _, player in pairs(players) do
+-- Store a table to map team names to colors
+local teamColors = {
+  ["Red"] = Color3.fromRGB(255, 0, 0),
+  ["Blue"] = Color3.fromRGB(0, 0, 255),
+  ["Green"] = Color3.fromRGB(0, 255, 0),
+  -- Add more colors for other teams
+}
+
+-- Function to create and update player highlight
+function updatePlayerHighlight(player)
   local character = player.Character
-  
-  if character and character:FindFirstChild("Humanoid") then
-    local highlight = script.Highlight:Clone()
-    highlight.Parent = character
-    highlight.Enabled = true -- Optional: adjust highlight properties here
+  if not character then return end
+
+  local highlight = character:FindFirstChild("Highlight")
+  if not highlight then
+    highlight = character:Clone()
+    highlight.Name = "Highlight"
+    highlight.CanCollide = false
+    highlight.Transparency = 0.3
+    -- Adjust other properties like Material, Reflectance, etc.
+    character.HumanoidRootPart:AppendChild(highlight)
+  end
+
+  local teamName = player.Team.Name
+  if teamColors[teamName] then
+    highlight.FillColor3 = teamColors[teamName]
   end
 end
 
--- Add code to handle new players joining and existing players leaving
-game.Players.PlayerAdded:Connect(function(newPlayer)
-  local character = newPlayer.Character
-  if character and character:FindFirstChild("Humanoid") then
-    local highlight = script.Highlight:Clone()
-    highlight.Parent = character
-    highlight.Enabled = true
-  end
+-- Loop through all players and update their highlights
+for _, player in pairs(Players:GetPlayers()) do
+  updatePlayerHighlight(player)
+end
+
+-- Update highlights whenever a player changes team
+Players.PlayerAdded:Connect(function(player)
+  updatePlayerHighlight(player)
 end)
 
-game.Players.PlayerRemoving:Connect(function(oldPlayer)
-  local character = oldPlayer.Character
-  if character then
-    local highlight = character:FindFirstChild("Highlight")
-    if highlight then
-      highlight:Destroy()
-    end
-  end
+Teams.TeamChanged:Connect(function(player, oldTeam, newTeam)
+  updatePlayerHighlight(player)
 end)
-
