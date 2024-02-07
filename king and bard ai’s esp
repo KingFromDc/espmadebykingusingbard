@@ -1,21 +1,21 @@
--- Script to highlight all players with the color red
+-- Script to highlight all players with a specific color, including turning the highlight off
 
--- Define the color red
-local redColor = Color3.fromRGB(255, 0, 0)
+-- Define the color to highlight players
+local highlightColor = Color3.fromRGB(255, 0, 0) -- Red color
 
--- Function to highlight a player with red color
+-- Function to highlight a player with the specified color
 local function highlightPlayer(player)
     local character = player.Character
     if character then
         for _, part in ipairs(character:GetDescendants()) do
             if part:IsA("BasePart") then
-                part.Color = redColor
+                part.Color = highlightColor
             end
         end
     end
 end
 
--- Function to remove red color from a player
+-- Function to remove highlight from a player
 local function removeHighlight(player)
     local character = player.Character
     if character then
@@ -36,3 +36,9 @@ end)
 game.Players.PlayerRemoving:Connect(function(player)
     removeHighlight(player)
 end)
+
+-- To turn off the highlight, you can simply set the highlight color to a different color or to nil
+-- For example:
+-- highlightColor = nil
+-- or
+-- highlightColor = Color3.fromRGB(0, 255, 0) -- Green color
